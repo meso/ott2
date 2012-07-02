@@ -3,7 +3,35 @@ script(type='text/javascript')
   socket.on('count', function(data) {
     $('#count').text(data.count);
   });
+  function send() {
+    var name = $('#name').val();
+    var text = $('#text').val();
+    if (text && name) {
+      socket.emit('message', {name: name, text: text});
+      $('#text').val('');
+    }
+  }
+  socket.on('message', function(data) {
+    var date = new Date(data.timestamp);
+    $('#chat').append(
+      '<div class="chatlog"><p>'
+      + escape(data.name)
+      + ': '
+      + escape(data.text)
+      + '</p><span class="date">'
+      + date.toString()
+      + '</span></div>');
+    $('#chat').scrollTop(1000000);
+  });
+  function escape(str) {
+    return $('<div></div>').text(str).html();
+  }
 h1= title
 p 現在接続している人は
   span#count
   人います
+#chat
+form#form(onsubmit='send(); return false;')
+  input#name(type='text', placeholder='Name')
+  input#text(type='text', autocomplete='off')
+  input(type='submit', value='送信')

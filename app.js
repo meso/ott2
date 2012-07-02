@@ -38,10 +38,23 @@ app.listen(3000, function(){
 
 var io = require('socket.io').listen(app);
 var chatCount = 0;
+var messages = [];
 var chat = io.of('/chat').on('connection', function(socket) {
   chatCount++;
   console.log(chatCount);
   chat.emit('count', {count: chatCount});
+
+  messages.forEach(function(data) {
+    socket.emit('message', data);
+  });
+  socket.on('message', function(data) {
+    data.timestamp = new Date().getTime();
+    chat.emit('message', data);
+    var length = messages.push(data);
+    if (length > 100) {
+      messages.shift();
+    }
+  });
 
   socket.on('disconnect', function() {
     chatCount--;

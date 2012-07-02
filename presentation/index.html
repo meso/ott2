@@ -527,7 +527,7 @@ script(type='text/javascript')
   chat.on('message', function(data) {
     var date = new Date(data.timestamp);
     $('#chat').append(
-      '&lt;div class="chatlog">&lt;p>
+      '&lt;div class="chatlog">&lt;p>'
       + escape(data.name)
       + ': '
       + escape(data.text)
@@ -537,7 +537,7 @@ script(type='text/javascript')
     $('#chat').scrollTop(1000000);
   });
   function escape(str) {
-    return $('&ltdiv>&lt/div>').text(str).html();
+    return $('&lt;div>&lt;/div>').text(str).html();
   }
 </pre>
       </article>
