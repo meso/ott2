@@ -479,7 +479,7 @@ script(type='text/javascript')
     var name = $('#name').val();
     var text = $('#text').val();
     if (text && name) {
-      chat.emit('message', {name: name, text: text});
+      socket.emit('message', {name: name, text: text});
       $('#text').val('');
     }
   }
@@ -524,10 +524,10 @@ var chat = io.of('/chat').on('connection', function(socket) {
         <pre>
 script(type='text/javascript')
   // 省略
-  chat.on('message', function(data) {
+  socket.on('message', function(data) {
     var date = new Date(data.timestamp);
     $('#chat').append(
-      '&lt;div class="chatlog">&lt;p>
+      '&lt;div class="chatlog">&lt;p>'
       + escape(data.name)
       + ': '
       + escape(data.text)
@@ -537,7 +537,7 @@ script(type='text/javascript')
     $('#chat').scrollTop(1000000);
   });
   function escape(str) {
-    return $('&ltdiv>&lt/div>').text(str).html();
+    return $('&lt;div>&lt;/div>').text(str).html();
   }
 </pre>
       </article>
