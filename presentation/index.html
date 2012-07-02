@@ -278,31 +278,30 @@
         <p>Node.js は低レベルのAPIしか用意していないので、このようなパッケージを導入して開発するのが一般的</p>
       </article>
 
-      <article class="smaller">
+      <article>
         <h3>インストール</h3>
         <ul>
           <li>Windows/Macはインストーラで</li>
           <li>Linux<br />
             <pre >
-$ curl http://nodejs.org/dist/v0.6.19/node-v0.6.19.tar.gz | tar xz
+$ curl http://nodejs.org/dist/v0.6.19/node-v0.6.19.tar.gz
+$ tar xz node-v0.6.19.tar.gz
 $ cd node-v0.6.19
 $ ./configure
 $ make
 $ sudo make install
-$ curl http://npmjs.org/install.sh | sudo sh
-            </pre>
+$ curl http://npmjs.org/install.sh | sudo sh</pre>
           </li>
         </ul>
       </article>
 
-      <article class="smaller">
+      <article>
         <h3>準備</h3>
         <pre>
 $ npm install express -g
 $ express chat && cd chat
 $ npm install
-$ npm install socket.io --save
-        </pre>
+$ npm install socket.io --save</pre>
         <pre>
 chat
  - public
@@ -318,10 +317,7 @@ chat
  - app.js
  - package.json
  - node_modules
-    - express
-    - jade
-    - socket.io
-        </pre>
+    - ...</pre>
       </article>
 
       <article class="smaller">
@@ -353,11 +349,10 @@ app.configure('development', function(){
 
 app.configure('production', function(){
   app.use(express.errorHandler());
-});
-        </pre>
+});</pre>
       </article>
 
-      <article class="smaller">
+      <article>
         <h3>app.js 続き</h3>
         <pre>
 // Routes
@@ -366,8 +361,7 @@ app.get('/', routes.index);
 
 app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
-});
-        </pre>
+});</pre>
         <h3>routes/index.js</h3>
         <pre>
 /*
@@ -376,8 +370,7 @@ app.listen(3000, function(){
 
 exports.index = function(req, res){
   res.render('index', { title: 'Express' })
-};
-        </pre>
+};</pre>
       </article>
 
       <article>
@@ -388,13 +381,11 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body!= body
-        </pre>
+  body!= body</pre>
         <h3>views/index.jade</h3>
         <pre>
 h1= title
-p Welcome to #{title}
-        </pre>
+p Welcome to #{title}</pre>
       </article>
 
       <article>
@@ -439,8 +430,7 @@ exports.chat = function(req, res) {
         <h3>クライアント側 - views/layout.jade</h3>
         <pre>
 script(type='text/javascript', src='http://code.jquery.com/jquery.min.js')
-script(type='text/javascript', src='/socket.io/socket.io.js')
-</pre>
+script(type='text/javascript', src='/socket.io/socket.io.js')</pre>
         <h3>views/chat.jade</h3>
         <pre>
 script(type='text/javascript')
@@ -451,8 +441,7 @@ script(type='text/javascript')
 h1= title
 p 現在接続している人は
   span#count
-  人います
-</pre>
+  人います</pre>
       </article>
 
       <article>
@@ -479,7 +468,7 @@ script(type='text/javascript')
     var name = $('#name').val();
     var text = $('#text').val();
     if (text && name) {
-      chat.emit('message', {name: name, text: text});
+      socket.emit('message', {name: name, text: text});
       $('#text').val('');
     }
   }
@@ -515,8 +504,7 @@ var chat = io.of('/chat').on('connection', function(socket) {
   });
 
   // 省略
-});
-        </pre>
+});</pre>
       </article>
 
       <article>
@@ -524,7 +512,7 @@ var chat = io.of('/chat').on('connection', function(socket) {
         <pre>
 script(type='text/javascript')
   // 省略
-  chat.on('message', function(data) {
+  socket.on('message', function(data) {
     var date = new Date(data.timestamp);
     $('#chat').append(
       '&lt;div class="chatlog">&lt;p>'
@@ -538,8 +526,7 @@ script(type='text/javascript')
   });
   function escape(str) {
     return $('&lt;div>&lt;/div>').text(str).html();
-  }
-</pre>
+  }</pre>
       </article>
 
       <article>
