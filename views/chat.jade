@@ -1,0 +1,9 @@
+script(type='text/javascript')
+  var socket = io.connect('/chat');
+  socket.on('count', function(data) {
+    $('#count').text(data.count);
+  });
+h1= title
+p 現在接続している人は
+  span#count
+  人います

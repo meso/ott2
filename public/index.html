@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+  <head>
+    <title>Node.js 入門</title>
+
+    <meta charset='utf-8'>
+    <script src='slides.js'></script>
+  </head>
+  
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+    
+    
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular'>
+      
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+
+      <article>
+        <h1>
+          Node.js 入門
+        </h1>
+        <p>
+          Toshihiro Shimizu (@meso)
+          <br>
+          July 03, 2012
+        </p>
+        <h2>
+          gooラボ Open Tech Talk 2
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          自己紹介
+        </h3>
+        <ul>
+          <li>name: 清水 俊博</li>
+          <li>work: dwango</li>
+          <li>community: Node.js日本ユーザグループ, java-ja, etc.</li>
+          <li>Twitter: <a href="http://twitter.com/meso">@meso</a></li>
+          <li>Hatena: <a href="http://meso.hatebablog.com/">id:t_43z</a></li>
+          <li>Github: <a href="http://github.com/meso">meso</a></li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>agenda</h3>
+        <ul>
+          <li>Node.js の概要</li>
+          <li>Node.js を使う</li>
+        </ul>
+      </article>
+
+      <article>
+        <h1>Node.js の概要</h1>
+      </article>
+
+      <article>
+        <h3>Node.js とは何か</h3>
+        <ul>
+          <li>Webブラウザ外で動作する、JavaScript の実行環境（プラットフォーム）</li>
+          <li>いわゆる"サーバサイドJavaScript"の1つ</li>
+        </ul>
+      </article>
+
+
+      <article>
+        <h3>サーバサイドJavaScript</h3>
+        <ul>
+          <li>Node.js 以外にも従来からいくつも存在
+            <ul>
+              <li>Netscape Enterprise Server, Helma, Aptana Jaxer, IIS+JScript, etc...</li>
+            </ul>
+          </li>
+          <li>しかしあまり流行らなかった
+            <ul>
+              <li>「別にサーバサイドでまで JavaScript で書きたいと思わないんだけど」で玉砕</li>
+            </ul>
+          </li>
+          <li>「サーバサイドでもJavaScriptが使いたい」が主目的
+            <ul>
+              <li>Node.js の目的は異なる</li>
+            </ul>
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>Node.js の目的</h3>
+        <q>Node's goal is to provide an easy way to build scalable network programs.</q>
+        <div class='author'>
+          Ryan Dahl
+        </div>
+        <ul>
+          <li>そのためには、解決すべき問題があった</li>
+          <li>その問題を解決するのにふさわしいプログラミング言語として JavaScript を選んだ</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>解決すべき問題</h3>
+        <ul>
+          <li>C10K問題</li>
+          <ul>
+            <li>ハードウェアの性能に関わらず、同時接続するクライアントの数に限界がきてしまう問題</li>
+            <li>原因は複合的だが主な原因の1つはスレッド数の増大
+              <ul>
+                <li>メモリ割り当て</li>
+                <li>コンテキストスイッチ</li>
+              </ul>
+            </li>
+            <li>Ajax/Cometが出てきて注目された
+              <ul>
+                <li>従来は分間1万リクエストであっても、スレッドは1万本もいらなかった</li>
+                <li>Cometによって、1万本のスレッドが必要になってしまった</li>
+            </li>
+          </ul>
+        </ul>
+      </article>
+
+      <article>
+        <h3>どうやって解決したか</h3>
+        <ul>
+          <li>イベントループ</li>
+          <li>ノンブロッキングI/O</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>イベントループモデル</h3>
+        <ul>
+          <li>1つのスレッドがイベントの発生を待機</li>
+          <li>イベントが発生したらそのイベントに即した処理を行う</li>
+          <li>重い処理を行う際には「その処理の結果が返ってきたら行う処理」を登録する</li>
+          <li>重い処理の結果が返ってくるのをその場で待ち続けはしない</li>
+          <li>シングルスレッドでも複数の同時リクエストをさばける</li>
+          <li>例: Nginx</li>
+        </ul>
+      </article>
+
+      <article class="fill">
+        <p>
+          <img style='height: 500px' src='images/pict01.png'>
+        </p>
+      </article>
+
+      <article>
+        <h3>イベントループモデルの問題点</h3>
+        <ul>
+          <li>1箇所でも重い処理を持つコードがあれば、シングルスレッドゆえに全体の性能が低下する</li>
+          <li>プログラムにとっての重い処理<br />
+              = CPUがフルに働けずに待ち時間が発生する処理<br />
+              = ディスクやネットワークのI/O待ち
+          </li>
+        </ul>
+        <table>
+          <tr><th>種別</th><th>サイクル</th><th>メートル換算</th></tr>
+          <tr><td>CPU L1キャッシュ</td><td>3</td><td>3m</td></tr>
+          <tr><td>CPU L2キャッシュ</td><td>14</td><td>14m</td></tr>
+          <tr><td>メモリ</td><td>250</td><td>250m</td></tr>
+          <tr><td>ディスク</td><td>41,000,000</td><td>地球1周</td></tr>
+          <tr><td>ネットワーク</td><td>240,000,000</td><td>地球6周</td></tr>
+        </table>
+      </article>
+
+      <article>
+        <h3>ノンブロッキングI/O</h3>
+        <ul>
+          <li>プログラマが見極めるんじゃなくて、強制的にI/Oを非同期にしてしまおう</li>
+          <li>libuv(libev, libeio)によって実現</li>
+          <li>I/O待ちによってブロックされることがないため性能が低下しない</li>
+        </ul>
+      </article>
+
+      <article>
+        <h1>このようなプラットフォームをどの言語向けに提供すべきか</h1>
+      </article>
+
+      <article>
+        <h3>JavaScript</h3>
+        <ul>
+          <li>シングルスレッドモデルである</li>
+          <li>イベントループの仕組みが備わっている</li>
+          <li>標準入出力の仕様がない<br />
+              = 既存のI/Oライブラリが存在しない<br />
+              = 全てがノンブロッキングな世界を0から作り上げることができる環境
+          </li>
+          <li>cf. Twisted, AnyEvent, EventMachine</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>JavaScript にした恩恵</h3>
+        <ul>
+          <li>ブラウザ競争のおかげで爆速なV8を使用できた</li>
+          <li>ユーザベースが大きい</li>
+          <li>新たな言語を覚えなくていい</li>
+          <li>開発環境やツールが整備されている</li>
+          <li>大きなイベントがある(jsconf)</li>
+        </ul>
+      </article>
+
+      <article>
+        <h1>Node.js を使う</h1>
+      </article>
+
+      <article>
+        <h3>適した分野</h3>
+        <ul>
+          <li>リアルタイムWebアプリケーション
+            <ul>
+              <li>チャット, ゲーム, コラボレーションツール, etc...</li>
+            </ul>
+          </li>
+          <li>bot
+            <ul>
+              <li>Twitter, IRC, etc...</li>
+            </ul>
+          </li>
+          <li>クローラー
+            <ul>
+              <li>I/Oウェイトが大量発生するがその時間を無駄にしない</li> 
+            </ul>
+          </li>
+          <li>スクレイピング
+            <ul>
+              <li>jQueryなどのJSライブラリが使える</li>
+            </ul>
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>作るもの</h3>
+        <ul>
+          <li>Webチャット</li>
+          <ul>
+            <li>リアルタイムさを味わってもらう</li>
+            <li>Node.js のイベント駆動の仕組みを学ぶ</li>
+            <li>手頃なボリューム</li>
+          </ul>
+        </ul>
+      </article>
+
+      <article>
+        <h3>使うもの</h3>
+        <ul>
+          <li><a href="http://expressjs.com">Express</a>
+            <ul>
+              <li>RubyのSinatraライクなWebアプリケーションフレームワーク</li>
+            </ul>
+          </li>
+          <li><a href="http://socket.io">Socket.IO</a>
+            <ul>
+              <li>WebSocket等を用いてブラウザとサーバでリアルタイム通信を行うためのライブラリ</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Node.js は低レベルのAPIしか用意していないので、このようなパッケージを導入して開発するのが一般的</p>
+      </article>
+
+      <article class="smaller">
+        <h3>インストール</h3>
+        <ul>
+          <li>Windows/Macはインストーラで</li>
+          <li>Linux<br />
+            <pre >
+$ curl http://nodejs.org/dist/v0.6.19/node-v0.6.19.tar.gz | tar xz
+$ cd node-v0.6.19
+$ ./configure
+$ make
+$ sudo make install
+$ curl http://npmjs.org/install.sh | sudo sh
+            </pre>
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>準備</h3>
+        <pre>
+$ npm install express -g
+$ express chat && cd chat
+$ npm install
+$ npm install socket.io --save
+        </pre>
+      </article>
+
+      <article>
+        <h3>ディレクトリ構成</h3>
+        <pre>
+chat
+ - public
+    - stylesheets
+       - style.css
+    - images
+    - javascripts
+ - views
+    - layout.jade
+    - index.jade
+ - routes
+    - index.js
+ - app.js
+ - package.json
+ - node_modules
+    - express
+    - jade
+    - socket.io
+
+      <article>
+        <h3>まとめ</h3>
+        <ul>
+          <li>Node.js には"js"である確固たる理由があります</li>
+          <li>Node.js を用いると、スケーラブルなリアルタイムWebアプリケーションが簡単に開発できます</li>
+          <li>開発を手助けする多数のパッケージが存在しており、簡単にそれらを扱うことができます</li>
+          <li>Webアプリだけじゃなくてクライアントアプリも作れます</li>
+        </ul>
+      </article>
+
+
+      <article class='smaller'>
+        <h3>
+          Simple slide with header and text (small font)
+        </h3>
+        <p>
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+          This is a slide with just text. This is a slide with just text.
+        </p>
+        <p>
+          There is more text just underneath with a <code>code sample: 5px</code>.
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Slide with bullet points and a longer title, just because we
+          can make it longer
+        </h3>
+        <ul>
+          <li>
+            Use this template to create your presentation
+          </li>
+          <li>
+            Use the provided color palette, box and arrow graphics, and
+            chart styles
+          </li>
+          <li>
+            Instructions are provided to assist you in using this
+            presentation template effectively
+          </li>
+          <li>
+            At all times strive to maintain Google's corporate look and feel
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Slide with bullet points that builds
+        </h3>
+        <ul class="build">
+          <li>
+            This is an example of a list
+          </li>
+          <li>
+            The list items fade in
+          </li>
+          <li>
+            Last one!
+          </li>
+        </ul>
+
+        <div class="build">
+          <p>Any element with child nodes can build.</p>
+          <p>It doesn't have to be a list.</p>
+        </div>
+      </article>
+
+      <article class='smaller'>
+        <h3>
+          Slide with bullet points (small font)
+        </h3>
+        <ul>
+          <li>
+            Use this template to create your presentation
+          <li>
+            Use the provided color palette, box and arrow graphics, and
+            chart styles
+          <li>
+            Instructions are provided to assist you in using this
+            presentation template effectively
+          <li>
+            At all times strive to maintain Google's corporate look and feel
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Slide with a table
+        </h3>
+        
+        <table>
+          <tr>
+            <th>
+              Name
+            <th>
+              Occupation
+          <tr>
+            <td>
+              Luke Mahé
+            <td>
+              V.P. of Keepin’ It Real
+          <tr>
+            <td>
+              Marcin Wichary
+            <td>
+              The Michael Bay of Doodles
+        </table>
+      </article>
+      
+      <article class='smaller'>
+        <h3>
+          Slide with a table (smaller text)
+        </h3>
+        
+        <table>
+          <tr>
+            <th>
+              Name
+            <th>
+              Occupation
+          <tr>
+            <td>
+              Luke Mahé
+            <td>
+              V.P. of Keepin’ It Real
+          <tr>
+            <td>
+              Marcin Wichary
+            <td>
+              The Michael Bay of Doodles
+        </table>
+      </article>
+      
+      <article>
+        <h3>
+          Styles
+        </h3>
+        <ul>
+          <li>
+            <span class='red'>class="red"</span>
+          <li>
+            <span class='blue'>class="blue"</span>
+          <li>
+            <span class='green'>class="green"</span>
+          <li>
+            <span class='yellow'>class="yellow"</span>
+          <li>
+            <span class='black'>class="black"</span>
+          <li>
+            <span class='white'>class="white"</span>
+          <li>
+            <b>bold</b> and <i>italic</i>
+        </ul>
+      </article>
+      
+      <article>
+        <h2>
+          Segue slide
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Slide with an image
+        </h3>
+        <p>
+          <img style='height: 500px' src='images/example-graph.png'>
+        </p>
+        <div class='source'>
+          Source: Sergey Brin
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Slide with an image (centered)
+        </h3>
+        <p>
+          <img class='centered' style='height: 500px' src='images/example-graph.png'>
+        </p>
+        <div class='source'>
+          Source: Larry Page
+        </div>
+      </article>
+
+      <article class='fill'>
+        <h3>
+          Image filling the slide (with optional header)
+        </h3>
+        <p>
+          <img src='images/example-cat.jpg'>
+        </p>
+        <div class='source white'>
+          Source: Eric Schmidt
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          This slide has some code
+        </h3>
+        <section>
+        <pre>
+&lt;script type='text/javascript'&gt;
+  // Say hello world until the user starts questioning
+  // the meaningfulness of their existence.
+  function helloWorld(world) {
+    for (var i = 42; --i &gt;= 0;) {
+      alert('Hello ' + String(world));
+    }
+  }
+&lt;/script&gt;
+&lt;style&gt;
+  p { color: pink }
+  b { color: blue }
+  u { color: 'umber' }
+&lt;/style&gt;
+</pre>
+        </section>
+      </article>
+      
+      <article class='smaller'>
+        <h3>
+          This slide has some code (small font)
+        </h3>
+        <section>
+        <pre>
+&lt;script type='text/javascript'&gt;
+  // Say hello world until the user starts questioning
+  // the meaningfulness of their existence.
+  function helloWorld(world) {
+    for (var i = 42; --i &gt;= 0;) {
+      alert('Hello ' + String(world));
+    }
+  }
+&lt;/script&gt;
+&lt;style&gt;
+  p { color: pink }
+  b { color: blue }
+  u { color: 'umber' }
+&lt;/style&gt;
+</pre>
+        </section>
+      </article>
+      
+      <article>
+        <q>
+          The best way to predict the future is to invent it.
+        </q>
+        <div class='author'>
+          Alan Kay
+        </div>
+      </article>
+      
+      <article class='smaller'>
+        <q>
+          A distributed system is one in which the failure of a computer 
+          you didn’t even know existed can render your own computer unusable.
+        </q>
+        <div class='author'>
+          Leslie Lamport
+        </div>
+      </article>
+      
+      <article class='nobackground'>
+        <h3>
+          A slide with an embed + title
+        </h3>
+        
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+
+      <article class='nobackground'>
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+
+      <article class='fill'>
+        <h3>
+          Full-slide embed with (optional) slide title on top
+        </h3>
+        <iframe src='http://www.google.com/doodle4google/history.html'></iframe>
+      </article>
+      
+      <article>
+        <h3>
+          Thank you!
+        </h3>
+        
+        <ul>
+          <li>
+            <a href='http://www.google.com'>google.com</a>
+        </ul>
+      </article>
+
+    </section>
+
+  </body>
+</html>
